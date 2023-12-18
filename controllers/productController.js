@@ -50,7 +50,7 @@ exports.addProduct = async (req, res) => {
       category: req.body.category,
       information: req.body.information,
     });
-    if (req.body.price) {
+    if (!req.body.price !== undefined) {
       product.product_price = req.body.productPrice;
     }
     await product.save();
