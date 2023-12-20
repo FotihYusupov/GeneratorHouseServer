@@ -21,6 +21,17 @@ exports.addBrand = async (req, res) => {
   }
 };
 
+exports.updateBrand = async (req, res) => {
+  try {
+    const findBrand = await Brands.findById(req.params.id);
+    findBrand.brand_name = req.body.brandName;
+    await findBrand.save();
+    return res.json('Brand updated');
+  } catch (err) {
+    return res.json(err);
+  }
+};
+
 exports.removeBrand = async (req, res) => {
   try {
     await Brands.findByIdAndDelete(req.params.id);
