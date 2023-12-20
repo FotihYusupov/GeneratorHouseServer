@@ -19,6 +19,10 @@ const ProductsSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: 'categories',
   },
+  brand: {
+    type: mongoose.Types.ObjectId,
+    ref: 'brands',
+  },
   information: {
     type: Array,
     default: [],

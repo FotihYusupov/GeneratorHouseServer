@@ -15,7 +15,7 @@ exports.upload = multer({ storage });
 
 exports.getAll = async (req, res) => {
   try {
-    const products = await Products.find();
+    const products = await Products.find().populate('brand').populate('category');
     return res.json(products);
   } catch (err) {
     return res.json(err);
@@ -24,7 +24,7 @@ exports.getAll = async (req, res) => {
 
 exports.byCategory = async (req, res) => {
   try {
-    const products = await Products.find({ category: req.params.categoryId });
+    const products = await Products.find({ category: req.params.categoryId }).populate('brands').populate('category');
     return res.json(products);
   } catch (err) {
     return res.json(err);
@@ -33,7 +33,7 @@ exports.byCategory = async (req, res) => {
 
 exports.byId = async (req, res) => {
   try {
-    const product = await Products.findOne({ _id: req.params.id });
+    const product = await Products.findOne({ _id: req.params.id }).populate('brands').populate('category');
     product.views += 1;
     await product.save();
     return res.json(product);
@@ -49,6 +49,7 @@ exports.addProduct = async (req, res) => {
       product_desc: req.body.productDesc,
       category: req.body.category,
       information: req.body.information,
+      brand: req.body.brand,
     });
     if (!req.body.price !== undefined) {
       product.product_price = req.body.productPrice;
@@ -63,7 +64,7 @@ exports.addProduct = async (req, res) => {
 exports.searchProduct = async (req, res) => {
   try {
     const regex = new RegExp(req.params.title, 'i');
-    const products = await Products.find({ product_title: { $regex: regex } });
+    const products = await Products.find({ product_title: { $regex: regex } }).populate('brands').populate('category');
     return res.json(products);
   } catch (err) {
     return res.json(err);
