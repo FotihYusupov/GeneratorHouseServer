@@ -24,7 +24,7 @@ exports.getAll = async (req, res) => {
 
 exports.byCategory = async (req, res) => {
   try {
-    const products = await Products.find({ category: req.params.categoryId }).populate('brands').populate('category');
+    const products = await Products.find({ category: req.params.categoryId }).populate('brand').populate('category');
     return res.json(products);
   } catch (err) {
     return res.json(err);
@@ -33,7 +33,7 @@ exports.byCategory = async (req, res) => {
 
 exports.byId = async (req, res) => {
   try {
-    const product = await Products.findOne({ _id: req.params.id }).populate('brands').populate('category');
+    const product = await Products.findOne({ _id: req.params.id }).populate('brand').populate('category');
     product.views += 1;
     await product.save();
     return res.json(product);
