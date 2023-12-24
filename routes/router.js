@@ -5,6 +5,7 @@ const productRoutes = require('./productRoutes');
 const brandsRoutes = require('./brandsRoutes');
 const categoryRuRoutes = require('./categoriesRoutesRu');
 const productRuRoutes = require('./productsRoutesRu');
+const discountRoutes = require('./discountRoutes');
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.use(userRoutes);
 router.use(categoryRoutes);
 router.use(productRoutes);
 router.use(brandsRoutes);
+router.use(discountRoutes);
 
 router.use('/ru', categoryRuRoutes);
 router.use('/ru', productRuRoutes);
