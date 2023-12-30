@@ -21,7 +21,7 @@ const ProductsRuSchema = new mongoose.Schema({
   },
   brand: {
     type: mongoose.Types.ObjectId,
-    ref: 'brandsRu',
+    ref: 'brands',
   },
   information: {
     type: Array,

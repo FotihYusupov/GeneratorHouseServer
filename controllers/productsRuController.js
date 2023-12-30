@@ -1,6 +1,7 @@
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const ProductsRu = require('../models/ProductsRu');
+const CategoriesRu = require('../models/CategoriesRu');
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
@@ -16,29 +17,31 @@ exports.upload = multer({ storage });
 exports.getAll = async (req, res) => {
   try {
     const products = await ProductsRu.find().populate('brand').populate('category');
-    return res.json(products);
+    res.json(products);
   } catch (err) {
-    return res.json(err);
+    res.json(err);
   }
 };
 
 exports.byCategory = async (req, res) => {
   try {
-    const products = await ProductsRu.find({ category: req.params.categoryId }).populate('brand').populate('categoryRu');
-    return res.json(products);
+    const products = await ProductsRu.find({ category: req.params.categoryId }).populate('brand').populate('category');
+    res.json(products);
   } catch (err) {
-    return res.json(err);
+    res.json(err);
   }
 };
 
 exports.byId = async (req, res) => {
   try {
-    const product = await ProductsRu.findOne({ _id: req.params.id }).populate('brand').populate('categoryRu');
-    product.views += 1;
-    await product.save();
-    return res.json(product);
+    const product = await ProductsRu.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true },
+    ).populate('brand').populate('category');
+    res.json(product);
   } catch (err) {
-    return res.json(err);
+    res.json(err);
   }
 };
 
@@ -50,79 +53,90 @@ exports.addProduct = async (req, res) => {
       category: req.body.category,
       information: req.body.information,
       brand: req.body.brand,
+      product_price: req.body.productPrice !== undefined ? req.body.productPrice : 0,
     });
-    if (!req.body.price !== undefined) {
-      product.product_price = req.body.productPrice;
-    }
     await product.save();
-    return res.json(product);
+    res.json(product);
   } catch (err) {
-    return res.send(err);
+    res.json(err);
   }
 };
 
 exports.searchProduct = async (req, res) => {
   try {
     const regex = new RegExp(req.params.title, 'i');
-    const products = await ProductsRu.find({ product_title: { $regex: regex } }).populate('brands').populate('categoryRu');
-    return res.json(products);
+    const products = await ProductsRu.find({ product_title: { $regex: regex } }).populate('brand').populate('category');
+    res.json(products);
   } catch (err) {
-    return res.json(err);
+    res.json(err);
   }
 };
 
 exports.addImg = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await ProductsRu.findOne({ _id: id });
+    const product = await ProductsRu.findByIdAndUpdate(
+      id,
+      { $push: { product_img: process.env.URL + req.files[0].filename } },
+      { new: true },
+    );
     if (product) {
-      product.product_img.push(process.env.URL + req.files[0].filename);
-      await ProductsRu.updateOne({ _id: id }, { product_img: product.product_img });
-      return res.send('Product updated');
+      res.send('Product updated');
+    } else {
+      res.status(404).json('Product not found');
     }
-    return res.status(404).json('product not found');
   } catch (err) {
-    return res.json(err);
+    res.json(err);
   }
 };
 
 exports.updateProduct = async (req, res) => {
   try {
-    const product = await ProductsRu.updateOne({
-      _id: req.params.id,
-    }, {
-      product_title: req.body.productTitle,
-      product_desc: req.body.productDesc,
-      product_price: req.body.productPrice,
-      product_img: req.body.productImg,
-      category: req.body.category,
-      information: req.body.information,
-    }, {
-      new: true,
-    });
-    return res.json(product);
+    const product = await ProductsRu.findByIdAndUpdate(
+      req.params.id,
+      {
+        product_title: req.body.productTitle,
+        product_desc: req.body.productDesc,
+        product_price: req.body.productPrice,
+        product_img: req.body.productImg,
+        category: req.body.category,
+        information: req.body.information,
+      },
+      { new: true },
+    );
+    res.json(product);
   } catch (err) {
-    return res.json(err);
+    res.json(err);
   }
 };
 
 exports.offerProduct = async (req, res) => {
   try {
-    const product = await ProductsRu.findById({ _id: req.params.id });
-    product.offer = true;
-    product.new_price = req.body.newPrice;
-    await product.save();
-    return res.json(product);
+    const product = await ProductsRu.findByIdAndUpdate(
+      req.params.id,
+      { offer: true, new_price: req.body.newPrice },
+      { new: true },
+    );
+    res.json(product);
   } catch (err) {
-    return res.json('Internal server error');
+    res.json(err);
   }
 };
 
 exports.deleteProduct = async (req, res) => {
   try {
     await ProductsRu.deleteOne({ _id: req.params.id });
-    return res.json('Product deleted');
+    res.json('Product deleted');
   } catch (err) {
-    return res.json('Internal server error');
+    res.json(err);
+  }
+};
+
+exports.getCategories = async (req, res) => {
+  try {
+    const categories = await CategoriesRu.find();
+    res.json(categories);
+  } catch (err) {
+    res.json(err);
   }
 };
