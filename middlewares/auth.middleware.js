@@ -7,6 +7,7 @@ function authMiddleware(req, res, next) {
     if (token) {
       const userId = verify(token);
       if (userId) {
+        req.headers.userId = userId;
         next();
       }
     }

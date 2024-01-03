@@ -123,6 +123,18 @@ exports.offerProduct = async (req, res) => {
   }
 };
 
+exports.deleteOffer = async (req, res) => {
+  try {
+    const product = await ProductsRu.findById({ _id: req.params.id });
+    product.offer = false;
+    product.new_price = 0;
+    await product.save();
+    return res.json(product);
+  } catch (err) {
+    return res.json('Internal server error');
+  }
+};
+
 exports.deleteProduct = async (req, res) => {
   try {
     await ProductsRu.deleteOne({ _id: req.params.id });
