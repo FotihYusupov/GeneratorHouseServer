@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/');
   },
   filename(req, file, cb) {
-    cb(null, `${uuidv4()}.${file.originalname}`);
+    cb(null, `${uuidv4()}:${file.originalname}`);
   },
 });
 
@@ -75,18 +75,17 @@ exports.searchProduct = async (req, res) => {
 exports.addImg = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await ProductsRu.findByIdAndUpdate(
-      id,
-      { $push: { product_img: process.env.URL + req.files[0].filename } },
-      { new: true },
-    );
+    const product = await ProductsRu.findOne({ _id: id });
     if (product) {
-      res.send('Product updated');
-    } else {
-      res.status(404).json('Product not found');
+      for (let i = 0; i < req.files.length; i += 1) {
+        product.product_img.push(process.env.URL + req.files[i].filename);
+      }
+      await ProductsRu.updateOne({ _id: id }, { product_img: product.product_img });
+      return res.send('Product updated');
     }
+    return res.status(404).json('product not found');
   } catch (err) {
-    res.json(err);
+    return res.json(err);
   }
 };
 

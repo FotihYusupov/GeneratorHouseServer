@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/');
   },
   filename(req, file, cb) {
-    cb(null, `${uuidv4()}.${file.originalname}`);
+    cb(null, `${uuidv4()}:${file.originalname}`);
   },
 });
 
@@ -76,7 +76,9 @@ exports.addImg = async (req, res) => {
     const { id } = req.params;
     const product = await Products.findOne({ _id: id });
     if (product) {
-      product.product_img.push(process.env.URL + req.files[0].filename);
+      for (let i = 0; i < req.files.length; i += 1) {
+        product.product_img.push(process.env.URL + req.files[i].filename);
+      }
       await Products.updateOne({ _id: id }, { product_img: product.product_img });
       return res.send('Product updated');
     }
