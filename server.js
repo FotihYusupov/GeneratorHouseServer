@@ -26,5 +26,5 @@ app.use(bodyParser.json());
 app.use('/api', router);
 
 mongoose.connect(process.env.MONGO_URL)
-  .then(() => app.listen(process.env.PORT || 3002, () => console.log('server is run')))
+  .then(() => app.listen(process.env.PORT || 8001, () => console.log('server is run')))
   .catch((err) => console.log('db error', err.message));
